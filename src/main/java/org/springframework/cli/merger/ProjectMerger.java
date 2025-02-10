@@ -614,7 +614,9 @@ public class ProjectMerger {
 			}
 			else {
 				AddRepository recipeAddRepository = getRecipeAddRepository(candidateRepository.getId(),
-						candidateRepository.getUrl(), candidateRepository.getName(), false, false);
+						candidateRepository.getUrl(), candidateRepository.getName(),
+						false, false,
+						AddRepository.Type.Repository);
 				List<SourceFile> pomFiles = mavenParser.parse(paths, this.currentProjectPath, getExecutionContext())
 					.toList();
 				List<Result> resultList = recipeAddRepository
@@ -701,8 +703,8 @@ public class ProjectMerger {
 	}
 
 	public static AddRepository getRecipeAddRepository(String id, String url, String name, boolean snapshotsEnabled,
-			boolean releasesEnabled) {
-		return new AddRepository(id, url, name, null, snapshotsEnabled, null, null, releasesEnabled, null, null);
+			boolean releasesEnabled, AddRepository.Type repositoryType) {
+		return new AddRepository(id, url, name, null, snapshotsEnabled, null, null, releasesEnabled, null, null, repositoryType);
 	}
 
 }
