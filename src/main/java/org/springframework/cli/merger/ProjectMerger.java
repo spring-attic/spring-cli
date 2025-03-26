@@ -172,13 +172,12 @@ public class ProjectMerger {
 	}
 
 	private void mergeSpringBootApplicationClassAnnotations() throws IOException {
-
 		logger.debug("Looking for @SpringBootApplication in directory " + this.toMergeProjectPath.toFile());
 		Optional<File> springBootApplicationFile = RootPackageFinder
-			.findSpringBootApplicationFile(this.toMergeProjectPath.toFile());
+				.findSpringBootApplicationFile(this.toMergeProjectPath.toFile());
 
 		if (springBootApplicationFile.isPresent()) {
-			CollectAnnotationAndImportInformationRecipe collectAnnotationAndImportInformationRecipe = new CollectAnnotationAndImportInformationRecipe();
+			CollectAnnotationAndImportInformationRecipe annotationImportRecipe = new CollectAnnotationAndImportInformationRecipe();
 			Consumer<Throwable> onError = e -> {
 				logger.error("error in javaParser execution", e);
 			};
@@ -187,11 +186,10 @@ public class ProjectMerger {
 			paths.add(springBootApplicationFile.get().toPath());
 			JavaParser javaParser = new Java17Parser.Builder().build();
 			List<SourceFile> compilationUnits = javaParser.parse(paths, null, executionContext).toList();
-			collectAnnotationAndImportInformationRecipe.run(new InMemoryLargeSourceSet(compilationUnits),
-					executionContext);
+			annotationImportRecipe.run(new InMemoryLargeSourceSet(compilationUnits), executionContext);
 
-			List<Annotation> declaredAnnotations = collectAnnotationAndImportInformationRecipe.getDeclaredAnnotations();
-			List<String> declaredImports = collectAnnotationAndImportInformationRecipe.getDeclaredImports();
+			List<Annotation> declaredAnnotations = annotationImportRecipe.getDeclaredAnnotations();
+			List<String> declaredImports = annotationImportRecipe.getDeclaredImports();
 
 			Map<String, String> annotationImportMap = new HashMap<>();
 			for (Annotation declaredAnnotation : declaredAnnotations) {
@@ -208,7 +206,7 @@ public class ProjectMerger {
 
 			logger.debug("Looking for @SpringBootApplication in directory " + this.currentProjectPath.toFile());
 			Optional<File> currentSpringBootApplicationFile = RootPackageFinder
-				.findSpringBootApplicationFile(this.currentProjectPath.toFile());
+					.findSpringBootApplicationFile(this.currentProjectPath.toFile());
 			if (currentSpringBootApplicationFile.isPresent()) {
 				executionContext = new InMemoryExecutionContext(onError);
 				paths = new ArrayList<>();
@@ -221,9 +219,9 @@ public class ProjectMerger {
 					AddImport addImport = new AddImport(importStatement, null, false);
 					AddImportRecipe addImportRecipe = new AddImportRecipe(addImport);
 					List<Result> results = addImportRecipe
-						.run(new InMemoryLargeSourceSet(compilationUnits), executionContext)
-						.getChangeset()
-						.getAllResults();
+							.run(new InMemoryLargeSourceSet(compilationUnits), executionContext)
+							.getChangeset()
+							.getAllResults();
 					updateSpringApplicationClass(currentSpringBootApplicationFile.get().toPath(), results);
 
 					AttributedStringBuilder sb = new AttributedStringBuilder();
@@ -232,15 +230,9 @@ public class ProjectMerger {
 					terminalMessage.print(sb.toAttributedString());
 
 					injectAnnotation(currentSpringBootApplicationFile.get().toPath(), annotation);
-					// AddAnnotationToClassRecipe addAnnotationToClassRecipe = new
-					// AddAnnotationToClassRecipe(annotation);
-					// results = addAnnotationToClassRecipe.run(compilationUnits);
-					// updateSpringApplicationClass(currentSpringBootApplicationFile.get().toPath(),
-					// results);
 				}
 			}
 		}
-
 	}
 
 	private void injectAnnotation(Path pathToFile, String annotation) {
