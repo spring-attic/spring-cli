@@ -21,20 +21,15 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cli.SpringCliException;
 import org.springframework.cli.roles.RoleService;
+import org.springframework.cli.util.TableUtils;
 import org.springframework.cli.util.TerminalMessage;
 import org.springframework.shell.command.annotation.Command;
 import org.springframework.shell.command.annotation.Option;
-import org.springframework.shell.table.ArrayTableModel;
-import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.Table;
-import org.springframework.shell.table.TableBuilder;
-import org.springframework.shell.table.TableModel;
 import org.springframework.util.StringUtils;
 
 @Command(command = "role", group = "Role")
@@ -129,19 +124,7 @@ public class RoleCommands extends AbstractSpringCliCommands {
 	public Table roleList() {
 		File directory = this.roleService.getRolesVarPath();
 		List<String> rolesNames = this.roleService.getRoleNames(directory);
-		Stream<String[]> header = Stream.<String[]>of(new String[] { "Name" });
-		Stream<String[]> rows;
-		if (rolesNames != null) {
-			rows = rolesNames.stream().map(tr -> new String[] { tr });
-		}
-		else {
-			rows = Stream.empty();
-		}
-		List<String[]> allRows = rows.collect(Collectors.toList());
-		String[][] data = Stream.concat(header, allRows.stream()).toArray(String[][]::new);
-		TableModel model = new ArrayTableModel(data);
-		TableBuilder tableBuilder = new TableBuilder(model);
-		return tableBuilder.addFullBorder(BorderStyle.fancy_light).build();
+		return TableUtils.buildTable(rolesNames, "Name");
 	}
 
 	public RoleService getRoleService() {
