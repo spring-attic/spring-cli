@@ -16,8 +16,6 @@
 
 package org.springframework.cli.runtime.command;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cli.runtime.engine.model.ModelPopulator;
-import org.springframework.cli.util.IoUtils;
 import org.springframework.cli.util.TerminalMessage;
 import org.springframework.shell.command.CommandRegistration;
 import org.springframework.shell.command.CommandRegistration.BuilderSupplier;
@@ -71,19 +68,19 @@ public class DynamicMethodCommandResolver implements CommandResolver {
 
 	@Override
 	public List<CommandRegistration> resolve() {
-		CommandScanResults commandScanResults = scanCommands();
+		CommandScanResults commandScanResults = CommandScanner.scanCommands();
 		log.debug("Found commands " + commandScanResults);
 		return registerSpringCliCommands(commandScanResults, modelPopulators, builder);
 	}
 
-	protected CommandScanResults scanCommands() {
-		Path cwd = IoUtils.getWorkingDirectory().toAbsolutePath();
-		Path pathToUse = Paths.get(cwd.toString(), ".spring", "commands");
-		log.debug("Looking for user-defined commands in directory " + pathToUse);
-		CommandScanner scanner = new CommandScanner(pathToUse);
-		CommandScanResults commandScanResults = scanner.scan();
-		return commandScanResults;
-	}
+	// protected CommandScanResults scanCommands() {
+	// Path cwd = IoUtils.getWorkingDirectory().toAbsolutePath();
+	// Path pathToUse = Paths.get(cwd.toString(), ".spring", "commands");
+	// log.debug("Looking for user-defined commands in directory " + pathToUse);
+	// CommandScanner scanner = new CommandScanner(pathToUse);
+	// CommandScanResults commandScanResults = scanner.scan();
+	// return commandScanResults;
+	// }
 
 	private List<CommandRegistration> registerSpringCliCommands(CommandScanResults results,
 			Collection<ModelPopulator> modelPopulators, CommandRegistration.BuilderSupplier builderSupplier) {

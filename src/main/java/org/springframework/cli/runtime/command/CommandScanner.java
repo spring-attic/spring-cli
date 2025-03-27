@@ -19,6 +19,7 @@ package org.springframework.cli.runtime.command;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cli.SpringCliException;
+import org.springframework.cli.util.IoUtils;
 
 /**
  * Scans a directory, by default .spring/commands in the current working directory, and
@@ -42,7 +44,7 @@ import org.springframework.cli.SpringCliException;
  */
 public class CommandScanner {
 
-	private final Logger logger = LoggerFactory.getLogger(CommandScanner.class);
+	private static final Logger logger = LoggerFactory.getLogger(CommandScanner.class);
 
 	private Path pathToScan;
 
@@ -120,6 +122,14 @@ public class CommandScanner {
 		}
 		command = new Command(name, description, command.getOptions());
 		return command;
+	}
+
+	public static CommandScanResults scanCommands() {
+		Path cwd = IoUtils.getWorkingDirectory().toAbsolutePath();
+		Path pathToUse = Paths.get(cwd.toString(), ".spring", "commands");
+		logger.debug("Looking for user-defined commands in directory " + pathToUse);
+		CommandScanner scanner = new CommandScanner(pathToUse);
+		return scanner.scan();
 	}
 
 }
