@@ -1,3 +1,7 @@
+= THIS REPOSITORY IS NO LONGER ACTIVELY MAINTAINED
+
+
+
 = A CLI focused on developer productivity
 
 * Note: this is a work in progress.
