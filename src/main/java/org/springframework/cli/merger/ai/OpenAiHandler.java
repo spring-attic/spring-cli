@@ -56,13 +56,13 @@ public class OpenAiHandler {
 			TerminalMessage terminalMessage) {
 		Path projectPath = getProjectPath(path);
 
-		ProjectNameHeuristicAiService projectNameHeuristic = new ProjectNameHeuristicAiService(terminalMessage);
+		ProjectNameHeuristicAiService projectNameHeuristic = new ProjectNameHeuristicAiService();
 		logger.debug("Deriving main Spring project required...");
 		ProjectName projectName = projectNameHeuristic.deriveProjectName(description);
 		logger.debug("Done.  The code will primarily use " + projectName.getSpringProjectName());
 
 		if (rewrite) {
-			DescriptionRewriteAiService descriptionRewriteAiService = new DescriptionRewriteAiService(terminalMessage);
+			DescriptionRewriteAiService descriptionRewriteAiService = new DescriptionRewriteAiService();
 			description = descriptionRewriteAiService.rewrite(description);
 		}
 		terminalMessage.print("");

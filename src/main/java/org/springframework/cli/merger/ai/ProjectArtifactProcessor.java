@@ -80,10 +80,10 @@ public class ProjectArtifactProcessor {
 				ProjectArtifactType artifactType = projectArtifact.getArtifactType();
 				switch (artifactType) {
 					case SOURCE_CODE:
-						writeSourceCode(projectArtifact, projectPath);
+						writeCode(projectArtifact, projectPath, false);
 						break;
 					case TEST_CODE:
-						writeTestCode(projectArtifact, projectPath);
+						writeCode(projectArtifact, projectPath, true);
 						break;
 					case MAVEN_DEPENDENCIES:
 						writeMavenDependencies(projectArtifact, projectPath, terminalMessage);
@@ -110,29 +110,24 @@ public class ProjectArtifactProcessor {
 		return processArtifactResult;
 	}
 
-	private void writeSourceCode(ProjectArtifact projectArtifact, Path projectPath) throws IOException {
+	private void writeCode(ProjectArtifact projectArtifact, Path projectPath, boolean isTest) throws IOException {
 		String packageName = this.calculatePackageForArtifact(projectArtifact);
 		ClassNameExtractor classNameExtractor = new ClassNameExtractor();
 		Optional<String> className = classNameExtractor.extractClassName(projectArtifact.getText());
 		if (className.isPresent()) {
-			Path output = createSourceFile(projectPath, packageName, className.get() + ".java");
+			Path output = createCodeFile(projectPath, packageName, className.get() + ".java", isTest);
 			try (Writer writer = new BufferedWriter(new FileWriter(output.toFile()))) {
 				writer.write(projectArtifact.getText());
 			}
 		}
 	}
 
-	private void writeTestCode(ProjectArtifact projectArtifact, Path projectPath) throws IOException {
-		// TODO parameterize better to reduce code duplication
-		String packageName = this.calculatePackageForArtifact(projectArtifact);
-		ClassNameExtractor classNameExtractor = new ClassNameExtractor();
-		Optional<String> className = classNameExtractor.extractClassName(projectArtifact.getText());
-		if (className.isPresent()) {
-			Path output = createTestFile(projectPath, packageName, className.get() + ".java");
-			try (Writer writer = new BufferedWriter(new FileWriter(output.toFile()))) {
-				writer.write(projectArtifact.getText());
-			}
-		}
+	private Path createCodeFile(Path projectPath, String packageName, String fileName, boolean isTest)
+			throws IOException {
+		Path sourceFile = isTest ? resolveTestFile(projectPath, packageName, fileName)
+				: resolveSourceFile(projectPath, packageName, fileName);
+		createFile(sourceFile);
+		return sourceFile;
 	}
 
 	private void writeMavenDependencies(ProjectArtifact projectArtifact, Path projectPath,
@@ -274,18 +269,6 @@ public class ProjectArtifactProcessor {
 			return matcher.group(1);
 		}
 		return null;
-	}
-
-	private Path createSourceFile(Path projectPath, String packageName, String fileName) throws IOException {
-		Path sourceFile = resolveSourceFile(projectPath, packageName, fileName);
-		createFile(sourceFile);
-		return sourceFile;
-	}
-
-	private Path createTestFile(Path projectPath, String packageName, String fileName) throws IOException {
-		Path sourceFile = resolveTestFile(projectPath, packageName, fileName);
-		createFile(sourceFile);
-		return sourceFile;
 	}
 
 	public Path resolveSourceFile(Path projectPath, String packageName, String fileName) {

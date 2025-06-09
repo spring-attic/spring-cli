@@ -172,21 +172,22 @@ public class DynamicCommand {
 	}
 
 	private boolean usedDefaultValue(String variableName, CommandContext commandContext) {
-		boolean usedDefaultValue = false;
-		// Look for matching option of the provided variable name and determine if a
-		// default value was used.
 		List<CommandParserResult> commandParserResults = commandContext.getParserResults().results();
 		for (CommandParserResult commandParserResult : commandParserResults) {
 			String optionName = NamingUtils.toKebab(commandParserResult.option().getLongNames()[0]);
-			if (variableName.equals(optionName)) {
+			if (variableName.equals(optionName)) { // Inline isName since it's a simple equals check
 				Object defaultOptionValue = commandParserResult.option().getDefaultValue();
 				Object optionValue = commandParserResult.value();
-				if (defaultOptionValue != null && optionValue != null && defaultOptionValue.equals(optionValue)) {
-					usedDefaultValue = true;
+				if (isDefaultValueMatching(defaultOptionValue, optionValue)) {
+					return true;
 				}
 			}
 		}
-		return usedDefaultValue;
+		return false;
+	}
+
+	private boolean isDefaultValueMatching(Object defaultOptionValue, Object optionValue) {
+		return defaultOptionValue != null && optionValue != null && defaultOptionValue.equals(optionValue);
 	}
 
 	public void runCommand(Path workingDirectory, String springDir, String commandsDir, Map<String, Object> model) {

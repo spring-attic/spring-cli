@@ -23,7 +23,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.cli.runtime.engine.model.ModelPopulator;
 import org.springframework.cli.runtime.engine.model.SystemModelPopulator;
@@ -31,7 +33,9 @@ import org.springframework.cli.util.TerminalMessage;
 import org.springframework.shell.command.CommandRegistration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mockStatic;
 
+@ExtendWith(MockitoExtension.class)
 class DynamicMethodCommandResolverTests {
 
 	@Test
@@ -71,30 +75,32 @@ class DynamicMethodCommandResolverTests {
 		modelPopulators.add(systemModelPopulator);
 		DynamicMethodCommandResolver resolver = new DynamicMethodCommandResolver(modelPopulators,
 				() -> CommandRegistration.builder(), TerminalMessage.noop(), null);
-		// Move to mock scan so that we control results
-		DynamicMethodCommandResolver spy = Mockito.spy(resolver);
-		Mockito.when(spy.scanCommands()).thenReturn(commandScanResults);
-		List<CommandRegistration> resolved = spy.resolve();
 
-		assertThat(resolved).hasSize(2);
-		assertThat(resolved).satisfiesExactly(registration -> {
-			assertThat(registration.getCommand()).isEqualTo("k8s-simple new");
-			assertThat(registration.getDescription()).isEqualTo("subcommand description");
-			assertThat(registration.getOptions()).hasSize(2);
-			assertThat(registration.getOptions().get(0)).satisfies(option -> {
-				assertThat(option.getLongNames()).contains("with-gusto");
-				assertThat(option.getType().getType()).isEqualTo(Boolean.class);
-				assertThat(option.getDescription()).isEqualTo("what a nice simple option");
-				assertThat(option.getDefaultValue()).isEqualTo("true");
-				assertThat(option.isRequired()).isTrue();
+		try (MockedStatic<CommandScanner> mockedCommandScanner = mockStatic(CommandScanner.class)) {
+			mockedCommandScanner.when(CommandScanner::scanCommands).thenReturn(commandScanResults);
+
+			List<CommandRegistration> resolved = resolver.resolve();
+
+			assertThat(resolved).hasSize(2);
+			assertThat(resolved).satisfiesExactly(registration -> {
+				assertThat(registration.getCommand()).isEqualTo("k8s-simple new");
+				assertThat(registration.getDescription()).isEqualTo("subcommand description");
+				assertThat(registration.getOptions()).hasSize(2);
+				assertThat(registration.getOptions().get(0)).satisfies(option -> {
+					assertThat(option.getLongNames()).contains("with-gusto");
+					assertThat(option.getType().getType()).isEqualTo(Boolean.class);
+					assertThat(option.getDescription()).isEqualTo("what a nice simple option");
+					assertThat(option.getDefaultValue()).isEqualTo("true");
+					assertThat(option.isRequired()).isTrue();
+				});
+				assertThat(registration.getOptions().get(1)).satisfies(option -> {
+					assertThat(option.getLongNames()).contains("with-greeting");
+					assertThat(option.getType().getType()).isEqualTo(String.class);
+				});
+			}, registration -> {
+				assertThat(registration.getCommand()).isEqualTo("k8s-simple new-services");
 			});
-			assertThat(registration.getOptions().get(1)).satisfies(option -> {
-				assertThat(option.getLongNames()).contains("with-greeting");
-				assertThat(option.getType().getType()).isEqualTo(String.class);
-			});
-		}, registration -> {
-			assertThat(registration.getCommand()).isEqualTo("k8s-simple new-services");
-		});
+		}
 	}
 
 }

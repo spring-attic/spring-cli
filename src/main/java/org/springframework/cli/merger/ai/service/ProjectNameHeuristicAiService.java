@@ -26,14 +26,9 @@ import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import org.springframework.cli.SpringCliException;
 import org.springframework.cli.merger.ai.ProjectName;
 import org.springframework.cli.merger.ai.PromptRequest;
-import org.springframework.cli.util.TerminalMessage;
 import org.springframework.util.StringUtils;
 
 public class ProjectNameHeuristicAiService extends AbstractOpenAiService {
-
-	public ProjectNameHeuristicAiService(TerminalMessage terminalMessage) {
-		super(terminalMessage);
-	}
 
 	public ProjectName deriveProjectName(String description) {
 		Map<String, String> context = getContext(description);
@@ -67,7 +62,6 @@ public class ProjectNameHeuristicAiService extends AbstractOpenAiService {
 			shortName = "ai";
 		}
 		return new ProjectName(shortName.toLowerCase(), springProjectName);
-
 	}
 
 }

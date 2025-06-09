@@ -30,14 +30,16 @@ import org.springframework.cli.util.TerminalMessage;
 
 public class GenerateCodeAiService extends AbstractOpenAiService {
 
+	private final TerminalMessage terminalMessage;
+
 	public GenerateCodeAiService(TerminalMessage terminalMessage) {
-		super(terminalMessage);
+		this.terminalMessage = terminalMessage;
 	}
 
 	public String generate(Map<String, String> context) {
 		PromptRequest promptRequest = createPromptRequest(context, "ai-add");
 		String completionEstimate = getCompletionEstimate();
-		getTerminalMessage()
+		terminalMessage
 			.print("Generating code.  This will take a few minutes ..." + " Check back around " + completionEstimate);
 		ChatCompletionRequest chatCompletionRequest = getChatCompletionRequest(promptRequest);
 		String response = getResponse(chatCompletionRequest);

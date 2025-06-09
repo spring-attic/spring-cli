@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.cli.CliTags;
 import org.springframework.cli.merger.ai.service.ProjectNameHeuristicAiService;
-import org.springframework.cli.util.TerminalMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,7 +29,7 @@ class ProjectNameHeuristicAiServiceTests {
 	@Test
 	@Tag(CliTags.AI)
 	void deriveProjectName() {
-		ProjectNameHeuristicAiService projectNameHeuristic = new ProjectNameHeuristicAiService(TerminalMessage.noop());
+		ProjectNameHeuristicAiService projectNameHeuristic = new ProjectNameHeuristicAiService();
 
 		ProjectName projectName = projectNameHeuristic.deriveProjectName("jpa");
 

@@ -35,7 +35,6 @@ import org.springframework.cli.SpringCliException;
 import org.springframework.cli.merger.ai.PromptRequest;
 import org.springframework.cli.runtime.engine.templating.HandlebarsTemplateEngine;
 import org.springframework.cli.util.PropertyFileUtils;
-import org.springframework.cli.util.TerminalMessage;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
 
@@ -44,12 +43,6 @@ public abstract class AbstractOpenAiService implements org.springframework.cli.m
 	private final HandlebarsTemplateEngine handlebarsTemplateEngine = new HandlebarsTemplateEngine();
 
 	private com.theokanning.openai.service.OpenAiService openAiService;
-
-	private final TerminalMessage terminalMessage;
-
-	public AbstractOpenAiService(TerminalMessage terminalMessage) {
-		this.terminalMessage = terminalMessage;
-	}
 
 	protected ChatCompletionRequest getChatCompletionRequest(PromptRequest promptRequest) {
 		createOpenAiService();
@@ -79,10 +72,6 @@ public abstract class AbstractOpenAiService implements org.springframework.cli.m
 		return handlebarsTemplateEngine;
 	}
 
-	public TerminalMessage getTerminalMessage() {
-		return terminalMessage;
-	}
-
 	protected Map<String, String> getContext(String description) {
 		Map<String, String> context = new HashMap<>();
 		context.put("description", description);
@@ -97,12 +86,11 @@ public abstract class AbstractOpenAiService implements org.springframework.cli.m
 			return getHandlebarsTemplateEngine().process(promptRaw, context);
 		}
 		catch (FileNotFoundException ex) {
-			throw new SpringCliException("Resource file note found:" + resourceFileName);
+			throw new SpringCliException("Resource file not found:" + resourceFileName);
 		}
 		catch (IOException ex) {
-			throw new SpringCliException("Could read file " + resourceFileName, ex);
+			throw new SpringCliException("Could not read file " + resourceFileName, ex);
 		}
-
 	}
 
 	protected PromptRequest createPromptRequest(Map<String, String> context, String promptFamilyName) {

@@ -21,13 +21,8 @@ import java.util.Map;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 
 import org.springframework.cli.merger.ai.PromptRequest;
-import org.springframework.cli.util.TerminalMessage;
 
 public class DescriptionRewriteAiService extends AbstractOpenAiService {
-
-	public DescriptionRewriteAiService(TerminalMessage terminalMessage) {
-		super(terminalMessage);
-	}
 
 	public String rewrite(String description) {
 		Map<String, String> context = getContext(description);
