@@ -18,6 +18,8 @@ package org.springframework.cli.util;
 
 import java.io.StringWriter;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXB;
 
@@ -33,17 +35,33 @@ public final class ConversionUtils {
 
 	}
 
+	/**
+	 * Converts Xpp3Dom to a String without any xml declaration
+	 * @param dom the Xpp3Dom to convert
+	 * @return String without any Xml Declarations
+	 */
 	public static String fromDomToString(Xpp3Dom dom) {
 		String element = dom.toString();
-		return element;
+        return element.lines().filter(l -> !l.contains("<?xml")).collect(Collectors.joining("\n"));
 	}
 
+	/**
+	 * Formats a list of Maven Dependencies as a String without the xml declaration
+	 * @param dependencies the list of Maven Dependencies to convert
+	 * @return String without any Xml Declarations or optional and type elements if they contain default values
+	 */
 	public static String fromDependencyListToString(List<Dependency> dependencies) {
 		StringWriter sw = new StringWriter();
+
 		Dependencies deps = new Dependencies(dependencies);
 		JAXB.marshal(deps, sw);
 		String xmlString = sw.toString();
-		return xmlString;
+		// filter out lines containing xml declarations and default elements like:
+		// <optional>false</optional> and <type>jar</type>
+		return xmlString.lines().filter(l -> !l.contains("<?xml") &&
+				!l.contains("<optional>false</optional>") &&
+				!l.contains("<type>jar</type>"))
+				.collect(Collectors.joining("\n"));
 	}
 
 	/*
@@ -52,18 +70,18 @@ public final class ConversionUtils {
 	 */
 	public static class Dependencies {
 
-		private List<Dependency> dependencies;
+		private List<Dependency> dependency;
 
 		public Dependencies(List<Dependency> dependencies) {
-			this.dependencies = dependencies;
+			this.dependency = dependencies;
 		}
 
-		public List<Dependency> getDependencies() {
-			return dependencies;
+		public List<Dependency> getDependency() {
+			return dependency;
 		}
 
-		public void setDependencies(List<Dependency> dependencies) {
-			this.dependencies = dependencies;
+		public void setDependency(List<Dependency> dependencies) {
+			this.dependency = dependencies;
 		}
 
 	}

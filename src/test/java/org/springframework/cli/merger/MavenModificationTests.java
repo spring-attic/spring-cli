@@ -78,7 +78,11 @@ public class MavenModificationTests {
 				pomReader.readPom(pomToMerge.toFile()), paths, mavenParser);
 
 		Model mergedModel = pomReader.readPom(mergedPomPath.toFile());
+		assertThat(mergedModel.getBuild().getPlugins()).hasSize(3);
+		List<String> mergedPluginIds = new ArrayList<>();
 		for (Plugin plugin : mergedModel.getBuild().getPlugins()) {
+
+			mergedPluginIds.add(plugin.getArtifactId());
 			if (plugin.getGroupId().equals("org.apache.maven.plugins")
 					&& plugin.getArtifactId().equals("maven-deploy-plugin")) {
 				assertThat(ConversionUtils.fromDomToString((Xpp3Dom) plugin.getConfiguration()))
@@ -98,6 +102,8 @@ public class MavenModificationTests {
 				assertThat(dep.getArtifactId()).isEqualTo("spring-boot-thin-layout");
 			}
 		}
+		assertThat(mergedPluginIds).containsExactlyInAnyOrder("maven-deploy-plugin", "maven-shade-plugin",
+				"spring-boot-maven-plugin");
 	}
 
 	@Test
